@@ -5,6 +5,9 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
@@ -22,6 +26,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
@@ -40,10 +45,15 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            TextInput()
+            CircularImage()
         }
     }
 }
+
+
+/**
+ * Simple [Greeting] Text
+ */
 
 @Composable
 fun Greeting() {
@@ -57,6 +67,18 @@ fun Greeting() {
     )
 }
 
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun GreetingPreview() {
+    JetpackComposeCCTheme {
+        Greeting()
+    }
+}
+
+
+/**
+ * [TextInput]
+ */
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -72,6 +94,18 @@ fun TextInput() {
     )
 }
 
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun TextInputPreview() {
+    JetpackComposeCCTheme {
+        TextInput()
+    }
+}
+
+
+/**
+ * [Column] & [Row] alternative of Linear layout
+ */
 
 @Composable
 fun ColumnRow() {
@@ -96,6 +130,19 @@ fun ColumnRow() {
     }
 }
 
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun ColumnRowPreview() {
+    JetpackComposeCCTheme {
+        ColumnRow()
+    }
+}
+
+
+/**
+ * [Box] alternative of constraint/frame layout.
+ */
+
 @Composable
 fun BoxComposable() {
     Box(contentAlignment = Alignment.BottomEnd) {
@@ -114,10 +161,23 @@ fun BoxComposable() {
     }
 }
 
+@Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun ListItemView(imgId: Int, name: String, occupation: String) {
+fun BoxComposablePreview() {
+    JetpackComposeCCTheme {
+        BoxComposable()
+    }
+}
+
+
+/**
+ * [ListItemView] Strategically making [Recyclerview].
+ */
+
+@Composable
+fun ListItemView(imgId: Int, name: String, occupation: String, modifier: Modifier) {
     Row(
-        Modifier.padding(20.dp)
+        modifier.padding(20.dp)
     ) {
         Image(
             painter = painterResource(id = imgId),
@@ -142,13 +202,51 @@ fun ListItemView(imgId: Int, name: String, occupation: String) {
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun GreetingPreview() {
+fun ListItemViewPreview() {
     JetpackComposeCCTheme {
         Column() {
-            ListItemView(R.drawable.ic_apple, "John Doe", "Software Developer")
-            ListItemView(R.drawable.ic_apple_tv, "Johnny Depp", "Television Star")
-            ListItemView(R.drawable.ic_apple_music, "avicii", "Music Composer")
-            ListItemView(R.drawable.ic_app_store, "Jeff bezos", "Store Keeper")
+            ListItemView(R.drawable.ic_apple, "John Doe", "Software Developer", Modifier)
+            ListItemView(R.drawable.ic_apple_tv, "Johnny Depp", "Television Star", Modifier)
+            ListItemView(R.drawable.ic_apple_music, "avicii", "Music Composer", Modifier)
+            ListItemView(R.drawable.ic_app_store, "Jeff bezos", "Store Keeper", Modifier)
         }
     }
+}
+
+/**
+ * [Modifier]
+ */
+
+@Preview(showBackground = true, widthDp = 300, heightDp = 500)
+@Composable
+private fun ModifierPreview() {
+    Text(text = "Hello",
+        color = Color.White,
+        modifier = Modifier
+            .background(Color.Blue)
+            .size(200.dp)
+            .padding(36.dp)
+            .clip(CircleShape)
+            .background(Color.Yellow)
+            .clickable { }
+    )
+}
+
+
+/**
+ * [CircularImage] using [Modifier]
+ */
+
+@Composable
+fun CircularImage() {
+    Image(
+        painter = painterResource(id = R.drawable.ic_apple),
+        contentScale = ContentScale.Crop,
+        modifier = Modifier
+            .size(200.dp)
+            .clip(CircleShape)
+            .clickable {  }
+            .border(2.dp, Color.LightGray, CircleShape),
+        contentDescription = "",
+    )
 }
