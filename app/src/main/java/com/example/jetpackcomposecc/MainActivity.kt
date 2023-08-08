@@ -2,6 +2,7 @@ package com.example.jetpackcomposecc
 
 import android.os.Bundle
 import android.util.Log
+import android.widget.ProgressBar
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -19,6 +20,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -37,16 +39,30 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.jetpackcomposecc.screens.QuoteDetail
+import com.example.jetpackcomposecc.screens.QuoteList
+import com.example.jetpackcomposecc.screens.QuoteListScreen
 import com.example.jetpackcomposecc.ui.theme.JetpackComposeCCTheme
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 const val MY_TAG = "Maverick Universe"
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent {
-            CircularImage()
+
+        CoroutineScope(Dispatchers.IO).launch {
+            delay(3000)
+            DataManager.loadAssetFromFile(applicationContext)
         }
+
+        setContent {
+            QuoteApp()
+        }
+
     }
 }
 
@@ -171,7 +187,7 @@ fun BoxComposablePreview() {
 
 
 /**
- * [ListItemView] Strategically making [Recyclerview].
+ * [ListItemView] Strategically making [RecyclerView].
  */
 
 @Composable
@@ -245,8 +261,35 @@ fun CircularImage() {
         modifier = Modifier
             .size(200.dp)
             .clip(CircleShape)
-            .clickable {  }
+            .clickable { }
             .border(2.dp, Color.LightGray, CircleShape),
         contentDescription = "",
     )
+}
+
+@Composable
+fun QuoteApp() {
+    if (DataManager.isDataLoaded.value) {
+
+        if (DataManager.currentPageType.value == PAGE_TYPE.QUOTE_LIST) {
+            QuoteListScreen(data = DataManager.data) {quote->
+                DataManager.switchPage(quote)
+            }
+        } else {
+            DataManager.currentQuote?.let { QuoteDetail(quote = it) }
+        }
+
+    } else {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.fillMaxSize(1f)
+        ) {
+            Text(text = "Loading.....", style = MaterialTheme.typography.headlineSmall)
+        }
+    }
+}
+
+enum class PAGE_TYPE {
+    QUOTE_LIST,
+    QUOTE_DETAIL
 }
