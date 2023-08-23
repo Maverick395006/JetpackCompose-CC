@@ -2,7 +2,6 @@ package com.example.jetpackcomposecc
 
 import android.os.Bundle
 import android.util.Log
-import android.widget.ProgressBar
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -17,13 +16,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -60,7 +63,9 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            QuoteApp()
+            JetpackComposeCCTheme {
+                Counter()
+            }
         }
 
     }
@@ -272,7 +277,7 @@ fun QuoteApp() {
     if (DataManager.isDataLoaded.value) {
 
         if (DataManager.currentPageType.value == PAGE_TYPE.QUOTE_LIST) {
-            QuoteListScreen(data = DataManager.data) {quote->
+            QuoteListScreen(data = DataManager.data) { quote ->
                 DataManager.switchPage(quote)
             }
         } else {
@@ -292,4 +297,55 @@ fun QuoteApp() {
 enum class PAGE_TYPE {
     QUOTE_LIST,
     QUOTE_DETAIL
+}
+
+/**
+ * [SideEffects] -> [LaunchedEffect]
+ */
+
+var counter = 1
+
+@Composable
+fun HasSideEffect() {
+    counter++
+    Text(text = "Maverick")
+}
+
+@Composable
+fun ListComposable() {
+    val categoryState = remember {
+        mutableStateOf(emptyList<String>())
+    }
+
+    LaunchedEffect(key1 = false) {
+        categoryState.value = fetchCategories()
+        Log.d(MY_TAG, "CALLED")
+    }
+
+    LazyColumn {
+        items(categoryState.value) { item ->
+            Text(text = item)
+        }
+    }
+
+}
+
+fun fetchCategories(): List<String> {
+    //assuming network call
+    return listOf("One", "Two", "Three", "four")
+}
+
+@Composable
+fun Counter() {
+    var count = remember {
+        mutableStateOf(0)
+    }
+    var key = count.value % 3 == 0
+
+    LaunchedEffect(key1 = key) {
+        Log.d(MY_TAG, "Current count: ${count.value}")
+    }
+    Button(onClick = { count.value++ }) {
+        Text(text = "Increment Count")
+    }
 }
