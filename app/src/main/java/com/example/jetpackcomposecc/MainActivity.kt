@@ -29,8 +29,10 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
@@ -72,7 +74,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             JetpackComposeCCTheme {
-                App4()
+                Derived()
             }
         }
 
@@ -527,3 +529,61 @@ fun KeyBoardComposable() {
         }
     }
 }
+
+
+/**
+ *
+ * [producedState] : It launches a coroutine scoped to the Composition that can push values into a returned State.
+ *
+ *                   [Use] it to convert non-Compose state into Compose state, for example bringing external
+ *                   subscription-driven state such as Flow , LiveData , or RxJava into the Composition.
+ *
+ * [derivedState] : It convert one or multiple state objects into another state.
+ *
+ *                  [Use] "derivedStateOf" when a certain state is calculated or derived from other state objects.
+ *                  Using this function guarantees that the calculation will only occur whenever one of the states
+ *                  used in the calculation changes.
+ *
+ */
+
+@Composable
+fun Counters() {
+    val state = produceState(initialValue = 0) {
+        for (i in 1..10) {
+            delay(1000L)
+            value++
+        }
+    }
+    Text(
+        text = state.value.toString(),
+        style = MaterialTheme.typography.headlineSmall
+    )
+}
+
+@Composable
+fun Derived() {
+    val tableOf = remember { mutableStateOf(5) }
+    val index = produceState(initialValue = 1) {
+        repeat(9) {
+            delay(1000L)
+            value++
+        }
+    }
+
+    val message = remember {
+        derivedStateOf {
+            "${tableOf.value} * ${index.value} = ${tableOf.value * index.value}"
+        }
+    }
+
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier.fillMaxSize(1f)
+    ) {
+        Text(
+            text = message.value,
+            style = MaterialTheme.typography.headlineLarge
+        )
+    }
+}
+
