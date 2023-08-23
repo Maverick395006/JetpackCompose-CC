@@ -29,6 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -64,7 +65,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             JetpackComposeCCTheme {
-                Counter()
+                CoroutineScopeComposable()
             }
         }
 
@@ -347,5 +348,67 @@ fun Counter() {
     }
     Button(onClick = { count.value++ }) {
         Text(text = "Increment Count")
+    }
+}
+
+/**
+ * [LaunchedEffect]
+ *
+ * v/s
+ *
+ * [RememberCoroutineScope] : This is useful for event-based functionality [As Example: onClick],
+ *                            We can get Exceptions while config changes by using this, Nothing Special.
+ *
+ */
+
+
+@Composable
+fun LaunchedEffectComposable() {
+    val counter = remember {mutableStateOf(0)}
+
+    LaunchedEffect(key1 = Unit) {
+        Log.d(MY_TAG, "Started...")
+        try {
+            for (i in 1..10) {
+                counter.value++
+                delay(1000L)
+            }
+        } catch (e: Exception) {
+            Log.d(MY_TAG, "Exception- ${e.message.toString()}")
+        }
+    }
+
+    var text = "Counter is running ${counter.value}"
+    if (counter.value == 10) {
+        text = "Counter stopped"
+    }
+    Text(text = text)
+}
+@Composable
+fun CoroutineScopeComposable() {
+    val counter = remember {mutableStateOf(0)}
+    val scope = rememberCoroutineScope()
+
+    var text = "Counter is running ${counter.value}"
+    if (counter.value == 10) {
+        text = "Counter stopped"
+    }
+    Column{
+        Text(text = text)
+        Button(onClick = {
+            scope.launch {
+                Log.d(MY_TAG, "CoroutineScopeComposable, Started...")
+                try {
+                    for (i in 1..10) {
+                        counter.value++
+                        delay(1000L)
+                    }
+                } catch (e: Exception) {
+                    Log.d(MY_TAG, "CoroutineScopeComposable, Exception- ${e.message.toString()}")
+                }
+            }
+        }) {
+            Text(text = "Start")
+        }
     }
 }
