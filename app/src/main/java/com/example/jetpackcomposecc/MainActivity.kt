@@ -27,9 +27,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -65,7 +67,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             JetpackComposeCCTheme {
-                CoroutineScopeComposable()
+                App2()
             }
         }
 
@@ -364,7 +366,7 @@ fun Counter() {
 
 @Composable
 fun LaunchedEffectComposable() {
-    val counter = remember {mutableStateOf(0)}
+    val counter = remember { mutableStateOf(0) }
 
     LaunchedEffect(key1 = Unit) {
         Log.d(MY_TAG, "Started...")
@@ -384,16 +386,17 @@ fun LaunchedEffectComposable() {
     }
     Text(text = text)
 }
+
 @Composable
 fun CoroutineScopeComposable() {
-    val counter = remember {mutableStateOf(0)}
+    val counter = remember { mutableStateOf(0) }
     val scope = rememberCoroutineScope()
 
     var text = "Counter is running ${counter.value}"
     if (counter.value == 10) {
         text = "Counter stopped"
     }
-    Column{
+    Column {
         Text(text = text)
         Button(onClick = {
             scope.launch {
@@ -410,5 +413,62 @@ fun CoroutineScopeComposable() {
         }) {
             Text(text = "Start")
         }
+    }
+}
+
+/**
+ *
+ * [RememberUpdatedState] : Its Useful for stay updated with changes in value.
+ *
+ */
+
+//Example:1
+
+@Composable
+fun App() {
+    var counter = remember { mutableStateOf(0) }
+    LaunchedEffect(key1 = Unit) {
+        delay(2000L)
+        counter.value = 10
+    }
+    Countr(counter.value)
+}
+
+@Composable
+fun Countr(value: Int) {
+    val state = rememberUpdatedState(newValue = value)
+    LaunchedEffect(key1 = Unit) {
+        delay(5000L)
+        Log.d(MY_TAG, state.value.toString())
+    }
+    Text(text = state.value.toString())
+}
+
+//Example:2
+
+
+fun a() {
+    Log.d(MY_TAG, "I am A from App")
+}
+
+fun b() {
+    Log.d(MY_TAG, "I am B from App")
+}
+
+@Composable
+fun App2() {
+    var state = remember { mutableStateOf(::a) }
+    Button(onClick = { state.value = ::b }) {
+        Text(text = "Click to change state")
+    }
+    LandingScreen(state.value)
+}
+
+@Composable
+fun LandingScreen(onTimeout: () -> Unit) {
+    val currentOnTimeout by rememberUpdatedState(onTimeout)
+    LaunchedEffect(key1 = true) {
+        delay(5000L)
+        currentOnTimeout()
     }
 }
