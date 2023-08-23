@@ -2,6 +2,7 @@ package com.example.jetpackcomposecc
 
 import android.os.Bundle
 import android.util.Log
+import android.view.ViewTreeObserver
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -26,6 +27,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -38,6 +40,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -45,6 +48,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import com.example.jetpackcomposecc.screens.QuoteDetail
 import com.example.jetpackcomposecc.screens.QuoteList
 import com.example.jetpackcomposecc.screens.QuoteListScreen
@@ -67,7 +72,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             JetpackComposeCCTheme {
-                App2()
+                App4()
             }
         }
 
@@ -470,5 +475,55 @@ fun LandingScreen(onTimeout: () -> Unit) {
     LaunchedEffect(key1 = true) {
         delay(5000L)
         currentOnTimeout()
+    }
+}
+
+/**
+ *
+ * [DisposableEffect] : It is Useful, when we need to clean-up something before leaving composable.
+ *
+ */
+
+// Example 1
+
+@Composable
+fun App3() {
+    var state = remember { mutableStateOf(false) }
+
+    DisposableEffect(key1 = state.value) {
+        Log.d(MY_TAG, "Disposable Effect Started")
+        onDispose {
+            Log.d(MY_TAG, "Cleaning up side effects")
+        }
+    }
+
+    Button(onClick = { state.value = !state.value }) {
+        Text(text = "Change State")
+    }
+
+}
+
+// Example 2
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun App4() {
+    KeyBoardComposable()
+    TextField(value = "", onValueChange = {})
+}
+
+@Composable
+fun KeyBoardComposable() {
+    val view = LocalView.current
+    DisposableEffect(key1 = Unit) {
+        val listener = ViewTreeObserver.OnGlobalLayoutListener {
+            val insets = ViewCompat.getRootWindowInsets(view)
+            val isKeyboardVisible = insets?.isVisible(WindowInsetsCompat.Type.ime())
+            Log.d(MY_TAG, isKeyboardVisible.toString())
+        }
+        view.viewTreeObserver.addOnGlobalLayoutListener { listener }
+        onDispose {
+            view.viewTreeObserver.removeOnGlobalLayoutListener(listener)
+        }
     }
 }
